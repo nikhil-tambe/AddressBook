@@ -49,12 +49,11 @@ class _AddressListScreenState extends State<AddressListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    AddressProvider provider = Provider.of<AddressProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Address Book"),
         actions: <Widget>[
-          buildSearchWidget(context, provider),
+          buildSearchWidget(context),
           buildShareWidget(),
         ],
       ),
@@ -94,13 +93,13 @@ class _AddressListScreenState extends State<AddressListScreen> {
     );
   }
 
-  IconButton buildSearchWidget(BuildContext context, AddressProvider provider) {
+  IconButton buildSearchWidget(BuildContext context) {
     return IconButton(
       icon: Icon(Icons.search),
       onPressed: () {
         showSearch(
             context: context,
-            delegate: LocationSearchDelegate(addressProvider: provider));
+            delegate: LocationSearchDelegate(gotoNext: true));
       },
     );
   }

@@ -40,18 +40,17 @@ class LocationHelper {
           candidates.forEach((data) {
             var location = data.geometry.location;
             print(
-                "Name: ${data.name} ==> Location: ${location.lat} ${location
-                    .lng}");
+                "Name: ${data.name} ==> Location: ${location.lat} ${location.lng}");
             addressList.add(Address(
                 address: data.name,
                 formattedAddress: data.formattedAddress,
                 lat: location.lat,
                 long: location.lng));
           });
-          if (addressList.length > 0) {
+          /*if (addressList.length > 0) {
             searchPlaceByCoordinates(
                 LatLng(addressList[0].lat, addressList[0].long));
-          }
+          }*/
           return addressList;
         }
         //print(response.body);
@@ -68,8 +67,9 @@ class LocationHelper {
     String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
         'key=${ApiKeys.MAPS_API_KEY}'
         '&location=${latLng.latitude},${latLng.longitude}'
-        '&radius=500'
-        '&keyword=name';
+        //'&radius=200'
+        '&keyword=name'
+        '&rankby=distance';
     print(url);
     try {
       var response = await http.get(url);
@@ -105,8 +105,7 @@ class LocationHelper {
   }
 
   static Future<Address> getPlaceDetails({String placeID}) async {
-    String url =
-        'https://maps.googleapis.com/maps/api/place/details/json?'
+    String url = 'https://maps.googleapis.com/maps/api/place/details/json?'
         'key=${ApiKeys.MAPS_API_KEY}'
         '&place_id=$placeID'
         '&fields=name,formatted_address,geometry';
@@ -120,8 +119,7 @@ class LocationHelper {
             address: placeDetailsResponse.result.name,
             formattedAddress: placeDetailsResponse.result.formattedAddress,
             lat: placeDetailsResponse.result.geometry.location.lat,
-            long: placeDetailsResponse.result.geometry.location.lng
-        );
+            long: placeDetailsResponse.result.geometry.location.lng);
       } else {
         print('Request failed with status: ${response.statusCode}.');
       }

@@ -1,5 +1,7 @@
 import 'package:addressbook/models/address_model.dart';
 import 'package:addressbook/providers/address_provider.dart';
+import 'package:addressbook/utils/location_helper.dart';
+import 'package:addressbook/utils/location_search_deligate.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +35,7 @@ class _MapScreenState extends State<MapScreen> {
           alignment: AlignmentDirectional.bottomCenter,
           children: <Widget>[
             GoogleMap(
-              padding: EdgeInsets.only(bottom: sheetHeight),
+              //padding: EdgeInsets.only(bottom: sheetHeight),
               initialCameraPosition:
                   CameraPosition(target: pinPosition, zoom: 16),
               markers: provider.markers,

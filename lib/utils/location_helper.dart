@@ -5,8 +5,9 @@ import 'package:addressbook/models/response_search.dart';
 
 import 'package:http/http.dart' as http;
 
+import 'api_keys.dart';
+
 class LocationHelper {
-  static const MAPS_API_KEY = '';
 
   static String generatePreview(double latitude, double longitude) {
     return 'https://maps.googleapis.com/maps/api/staticmap?'
@@ -15,14 +16,14 @@ class LocationHelper {
         '&size=600x300'
         '&maptype=roadmap'
         '&markers=color:red%7Clabel:C%7C$latitude,$longitude'
-        '&key=$MAPS_API_KEY';
+        '&key=${ApiKeys.MAPS_API_KEY}';
   }
 
   static Future<List<Address>> searchPlaces(String place) async {
     List<Address> addressList = new List();
     String url =
         'https://maps.googleapis.com/maps/api/place/findplacefromtext/json?'
-        'key=${LocationHelper.MAPS_API_KEY}'
+        'key=${ApiKeys.MAPS_API_KEY}'
         '&input=$place'
         '&inputtype=textquery'
         '&fields=name,geometry,formatted_address';

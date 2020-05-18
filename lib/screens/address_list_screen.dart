@@ -5,6 +5,7 @@ import 'package:addressbook/utils/location_search_deligate.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 
 import 'map_screen.dart';
 
@@ -53,14 +54,8 @@ class _AddressListScreenState extends State<AddressListScreen> {
       appBar: AppBar(
         title: Text("Address Book"),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                  context: context,
-                  delegate: LocationSearchDelegate(addressProvider: provider));
-            },
-          )
+          buildSearchWidget(context, provider),
+          buildShareWidget(),
         ],
       ),
       body: SingleChildScrollView(
@@ -96,6 +91,41 @@ class _AddressListScreenState extends State<AddressListScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  IconButton buildSearchWidget(BuildContext context, AddressProvider provider) {
+    return IconButton(
+      icon: Icon(Icons.search),
+      onPressed: () {
+        showSearch(
+            context: context,
+            delegate: LocationSearchDelegate(addressProvider: provider));
+      },
+    );
+  }
+
+  Builder buildShareWidget() {
+    return Builder(
+      builder: (BuildContext context) {
+        return IconButton(
+          icon: Icon(Icons.share),
+          onPressed: latitude == null
+              ? () {
+                  final snackBar = SnackBar(
+                    content: Text('Update Current Location First!!'),
+                  );
+                  Scaffold.of(context).showSnackBar(snackBar);
+                }
+              : () {
+                  final RenderBox box = context.findRenderObject();
+                  Share.share('Latitude: $latitude,\nLongitude: $longitude',
+                      subject: "My Co-ordinates",
+                      sharePositionOrigin:
+                          box.localToGlobal(Offset.zero) & box.size);
+                },
+        );
+      },
     );
   }
 }

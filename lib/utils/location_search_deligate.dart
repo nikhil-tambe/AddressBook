@@ -1,4 +1,5 @@
 import 'package:addressbook/models/address_model.dart';
+import 'package:addressbook/models/response_autocomplete.dart';
 import 'package:addressbook/providers/address_provider.dart';
 import 'package:addressbook/screens/map_screen.dart';
 import 'package:addressbook/utils/location_helper.dart';
@@ -13,7 +14,7 @@ class LocationSearchDelegate extends SearchDelegate<List<Address>> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return Column();
+    return provideSuggestions();
   }
 
   @override
@@ -40,34 +41,75 @@ class LocationSearchDelegate extends SearchDelegate<List<Address>> {
 
   @override
   Widget buildResults(BuildContext context) {
+    return searchResultByName();
+  }
+
+  FutureBuilder<List<Predictions>> provideSuggestions() {
     return FutureBuilder(
-      future: LocationHelper.searchPlaces(query),
+      future: LocationHelper.placeAutoComplete(query),
       builder: (context, snapshot) {
-        if (snapshot.data != null) {
-          List<Address> list = snapshot.data;
-          return list.length == 0
-              ? Center(child: Text("No Matches Found"))
-              : ListView.builder(
-                  itemCount: list.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        Navigator.of(context)
-                            .pushNamed(MapScreen.routeName, arguments: {
-                          'address': list[index],
-                        });
-                      },
-                      child: ListTile(
-                        title: Text(list[index].address),
-                        subtitle: Text(list[index].formattedAddress),
-                      ),
-                    );
-                  },
-                );
+        if (snapshot != null) {
+          List<Predictions> list = snapshot.data;
+          if (list != null) {
+            return list.length == 0
+                ? Center(child: Text("Type to view locations"))
+                : ListView.builder(
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () => fetchDetailsAndNavigateToMap(
+                            context: context, placeId: list[index].placeId),
+                        child: ListTile(
+                          title: Text(list[index].description),
+                        ),
+                      );
+                    },
+                  );
+          }
         }
         return Center(child: CircularProgressIndicator());
       },
     );
   }
 
+  FutureBuilder<List<Address>> searchResultByName() {
+    return FutureBuilder(
+    future: LocationHelper.searchPlacesByName(query),
+    builder: (context, snapshot) {
+      if (snapshot.data != null) {
+        List<Address> list = snapshot.data;
+        return list.length == 0
+            ? Center(child: Text("No Matches Found"))
+            : ListView.builder(
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () {
+                      Navigator.of(context)
+                          .pushNamed(MapScreen.routeName, arguments: {
+                        'address': list[index],
+                      });
+                    },
+                    child: ListTile(
+                      title: Text(list[index].address),
+                      subtitle: Text(list[index].formattedAddress),
+                    ),
+                  );
+                },
+              );
+      }
+      return Center(child: CircularProgressIndicator());
+    },
+  );
+  }
+
+  Future<void> fetchDetailsAndNavigateToMap(
+      {BuildContext context, String placeId}) async {
+    LocationHelper.getPlaceDetails(placeID: placeId).then((value) {
+      print(value.formattedAddress);
+      Navigator.of(context).pushNamed(MapScreen.routeName, arguments: {
+        'address': value,
+      });
+    });
+  }
 }

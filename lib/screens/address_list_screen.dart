@@ -1,16 +1,15 @@
 import 'package:addressbook/models/address_model.dart';
-import 'package:addressbook/providers/address_provider.dart';
 import 'package:addressbook/utils/location_helper.dart';
 import 'package:addressbook/utils/location_search_deligate.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
-import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 
 import 'map_screen.dart';
 
 class AddressListScreen extends StatefulWidget {
-  static const routeName = "AddressListScreen";
+  static const routeName = "/";
 
   @override
   _AddressListScreenState createState() => _AddressListScreenState();
@@ -19,6 +18,44 @@ class AddressListScreen extends StatefulWidget {
 class _AddressListScreenState extends State<AddressListScreen> {
   String _locationURL;
   double latitude, longitude;
+
+  @override
+  void initState() {
+    super.initState();
+    this.initDynamicLinks();
+  }
+
+  void initDynamicLinks() async {
+    final PendingDynamicLinkData data =
+        await FirebaseDynamicLinks.instance.getInitialLink();
+    final Uri deepLink = data?.link;
+
+    print('Deep Link: ${deepLink.toString()}');
+    if (deepLink != null) {
+      gotoDeepLink(deepLink);
+    }
+
+    FirebaseDynamicLinks.instance.onLink(
+        onSuccess: (PendingDynamicLinkData dynamicLink) async {
+          final Uri deepLink = dynamicLink?.link;
+
+          print('Deep Link: onLink => ${deepLink.toString()}');
+          if (deepLink != null) {
+            gotoDeepLink(deepLink);
+          }
+        }, onError: (OnLinkErrorException e) async {
+      print('onLinkError');
+      print(e.message);
+    });
+  }
+
+  void gotoDeepLink(deepLink){
+    print(deepLink.path);
+    if (deepLink.path.startsWith('/mapScreen')) {
+      return;
+    }
+    Navigator.pushNamed(context, deepLink.path);
+  }
 
   Future<void> showCurrentLocation() async {
     var locationData = await Location().getLocation();
@@ -98,8 +135,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
       icon: Icon(Icons.search),
       onPressed: () {
         showSearch(
-            context: context,
-            delegate: LocationSearchDelegate(gotoNext: true));
+            context: context, delegate: LocationSearchDelegate(gotoNext: true));
       },
     );
   }
